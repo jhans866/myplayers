@@ -8,7 +8,7 @@ public class Player {
 
     @Id
     @Column(name = "PLAYERID")
-    @GeneratedValue(strategy = GenerationType.UUID)
+   // @GeneratedValue(strategy = GenerationType.UUID)
     private String playerId;
 
     @Column(name = "BIRTHYEAR")

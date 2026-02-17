@@ -22,4 +22,5 @@ server:
   error:
     include-message: always
 
-
+  cache:
+    type: simple
