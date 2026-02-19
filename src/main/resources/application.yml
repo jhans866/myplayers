@@ -22,5 +22,53 @@ server:
   error:
     include-message: always
 
-  cache:
-    type: simple
+  #cache:
+    #type: simple
+  spring:
+    cache:
+      type: caffeine                          # ✅ Switch from simple to caffeine
+      caffeine:
+        spec: maximumSize=500,expireAfterWrite=10m  # ✅ Max 500 entries, expire after 10 min
+      cache-names: players,playerPages,allPlayers,playerSearch
+# Existing properties...
+
+# Security
+  security:
+    user:
+      name: admin # Remove if present
+      password: admin123  # Remove if present
+  logging:
+    level.org.springframework.security=DEBUG  # Optional: see auth logs
+
+  # ✅ Expose health endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,caches
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+
+# ✅ Expose health endpoints
+  #management.endpoints.web.exposure.include=health,info,metrics
+  #management.endpoint.health.show-details=always
+  #management.health.defaults.enabled=true
+
+  # Liveness + Readiness probes (Kubernetes)
+  #management.endpoint.health.probes.enabled=true
+  #management.health.livenessState.enabled=true
+  #management.health.readinessState.enabled=true

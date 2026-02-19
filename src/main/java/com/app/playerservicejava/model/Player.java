@@ -3,7 +3,10 @@ package com.app.playerservicejava.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name="PLAYERS")
+@Table(name="PLAYERS" , indexes = {
+        @Index(name = "idx_firstname", columnList = "NAMEFIRST"),
+        @Index(name = "idx_lastname", columnList = "NAMELAST")
+})
 public class Player {
 
     @Id
