@@ -173,7 +173,37 @@ public class PlayerService {
         return value;
     }
 
+    @CachePut(value = "players", key = "#id")
+    @CacheEvict(value = {"playerPages", "allPlayers", "playerSearch"}, allEntries = true)
+    public Optional<Player> patchPlayer(String id, Player patch) {
+        Optional<Player> existing = playerRepository.findById(id);
 
+        if (existing.isEmpty()) {
+            LOGGER.warn("Player not found for PATCH: {}", id);
+            return Optional.empty();
+        }
+
+        Player player = existing.get();
+
+        // ✅ Only update non-null fields
+       // if (patch.getNameFirst()    != null) player.setNameFirst(patch.getNameFirst());
+        //if (patch.getNameLast()     != null) player.setNameLast(patch.getNameLast());
+        if (patch.getBirthCity()    != null) player.setBirthCity(patch.getBirthCity());
+        if (patch.getBirthState()   != null) player.setBirthState(patch.getBirthState());
+        if (patch.getBirthCountry() != null) player.setBirthCountry(patch.getBirthCountry());
+        if (patch.getBirthYear()    != null) player.setBirthYear(patch.getBirthYear());
+        if (patch.getBirthMonth()   != null) player.setBirthMonth(patch.getBirthMonth());
+        if (patch.getBirthDay()     != null) player.setBirthDay(patch.getBirthDay());
+        if (patch.getBats()         != null) player.setBats(patch.getBats());
+       // if (patch.getThrowsHand()   != null) player.setThrowsHand(patch.getThrowsHand());
+        if (patch.getWeight()       != null) player.setWeight(patch.getWeight());
+        if (patch.getHeight()       != null) player.setHeight(patch.getHeight());
+        if (patch.getDebut()        != null) player.setDebut(patch.getDebut());
+        if (patch.getFinalGame()    != null) player.setFinalGame(patch.getFinalGame());
+
+        LOGGER.info("Patching player: {}", id);
+        return Optional.of(playerRepository.save(player));
+    }
 
 
 }

@@ -1,6 +1,7 @@
 package com.app.playerservicejava.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name="PLAYERS" , indexes = {
@@ -12,6 +13,7 @@ public class Player {
     @Id
     @Column(name = "PLAYERID")
    // @GeneratedValue(strategy = GenerationType.UUID)
+    @NotBlank(message = "playerId is required")
     private String playerId;
 
     @Column(name = "BIRTHYEAR")

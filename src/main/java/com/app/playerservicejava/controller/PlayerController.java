@@ -7,6 +7,7 @@ import com.app.playerservicejava.model.Players;
 import com.app.playerservicejava.service.PlayerService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,32 +36,28 @@ public class PlayerController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayerController.class);
 
-    @GetMapping("/all")
+/*    @GetMapping("/all")
     public ResponseEntity<Players> getPlayers() {
         Players players = playerService.getPlayers();
         return ok(players);
-    }
+    }*/
 
     @GetMapping
-    public ResponseEntity<?> getPlayers(
-            @RequestParam(required = false) String team,  // birthCountry filter
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+    public ResponseEntity<?> getplayers(@RequestParam(required = false) String country,
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "20") int size)
+    {
+        if(size >100 || size<1) size = 20;
+        Pageable pageable = PageRequest.of(page,size,Sort.by("playerID").ascending());
+        Page<Player> pageResult = playerService.getPlayersPaginated(country,pageable);
 
-        if (size > 100 || size < 1) size = 20;
-        Pageable pageable = PageRequest.of(page, size, Sort.by("firstName").ascending()
-                .and(Sort.by("lastName").ascending()));
-
-        Page<Player> pageResult = playerService.getPlayersPaginated(team, pageable);
-
-        // Raw Page JSON: content, totalElements, totalPages, number (page), size
         return ResponseEntity.ok(Map.of(
-                "content", pageResult.getContent(),
-                "page", pageResult.getNumber(),
-                "size", pageResult.getSize(),
-                "totalElements", pageResult.getTotalElements(),
-                "totalPages", pageResult.getTotalPages()
-        ));
+                "content",pageResult.getContent(),
+                "page",pageResult.getNumber(),
+                "size",pageResult.getSize(),
+                "totalElements",pageResult.getTotalElements(),
+                "totalPages",pageResult.getTotalPages()
+                ));
     }
 
 
@@ -116,7 +113,7 @@ public class PlayerController {
     }*/
 
     @PostMapping
-    public ResponseEntity<Player> createPlayer(@RequestBody Player player) {
+    public ResponseEntity<Player> createPlayer(@Valid @RequestBody Player player) {
         if (playerService.getPlayerById(player.getPlayerId()).isPresent()) {
             throw new PlayerAlreadyExistsException(player.getPlayerId());
         }
@@ -225,6 +222,17 @@ public class PlayerController {
 
         writer.flush();
         LOGGER.info("CSV export completed");
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Player> patchPlayer(
+            @PathVariable String id,
+            @RequestBody Player patch) {
+
+        LOGGER.info("PATCH request for player: {}", id);
+        return playerService.patchPlayer(id, patch)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
 }
